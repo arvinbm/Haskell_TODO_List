@@ -21,3 +21,23 @@ markTaskDone desc task = if description task == desc
 
 completeTask :: String -> [Task] -> [Task]
 completeTask desc taskList = map (markTaskDone desc) taskList
+
+loop :: [Task] -> IO ()
+loop taskList = do
+    line <- getLine
+    case words line of
+        ["quit"] -> putStrLn "Bye!"
+        ["list"] -> do
+            putStrLn (renderAll taskList)
+            loop taskList
+        ("add":rest) -> loop (addTask (unwords rest) taskList)
+        ("done":rest) -> loop (completeTask (unwords rest) taskList)
+        _ -> do
+            putStrLn "commands: add <task>, done <task>, list, quit"
+            loop taskList
+
+main :: IO ()
+main = do
+    let greeting = "Your TODO list. Commands: add, done, list, quit"
+    putStrLn greeting
+    loop []
