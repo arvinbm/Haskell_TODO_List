@@ -24,6 +24,19 @@ You need GHC and cabal (easiest via [GHCup](https://www.haskell.org/ghcup/)). Th
 cabal run
 ```
 
+## What I learned
+
+Building this taught me the Haskell basics, hands-on:
+
+- **Defining my own types** — the `Task` record, and `deriving` abilities like `Show`, `Read`, `Eq`
+- **Pure functions** — `addTask`, `completeTask`, `renderAll` always give the same answer for the same input and can't touch the outside world; the type says so
+- **Pattern matching** — `case words line of` to pick apart user commands by shape
+- **Working with lists** — `map`, `:`, `words`/`unwords`, `unlines` instead of writing loops
+- **Recursion instead of loops** — the app "remembers" the task list by each round of `loop` passing a new list to the next round; nothing is ever modified in place
+- **IO vs pure code** — `do` blocks, `<-` vs `let`, and why `main :: IO ()`
+- **Persistence with `show` and `read`** — turning the whole task list into text and back
+- **Project structure** — GHCup for the toolchain, `cabal init`, `build-depends`, `cabal run`
+
 ## Project structure
 
 - `app/Main.hs` — all the code: pure functions for the task logic, IO actions for the loop and file storage
