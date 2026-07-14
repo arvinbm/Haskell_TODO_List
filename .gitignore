@@ -1,0 +1,5 @@
+# cabal's build output
+dist-newstyle/
+
+# personal task data, not source code
+tasks.txt
