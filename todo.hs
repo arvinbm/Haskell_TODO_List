@@ -1,7 +1,9 @@
+import System.Directory (doesFileExist)
+
 data Task = Task {
     description :: String,
     done :: Bool
-} deriving(Show)
+} deriving(Show, Read)
 
 render :: Task -> String
 render task = if done task
@@ -22,11 +24,26 @@ markTaskDone desc task = if description task == desc
 completeTask :: String -> [Task] -> [Task]
 completeTask desc taskList = map (markTaskDone desc) taskList
 
+loadTasks :: IO [Task]
+loadTasks = do
+    exists <- doesFileExist "tasks.txt"
+    if exists
+        then do
+            text <- readFile "tasks.txt"
+            return (read text)
+        else
+            return []
+
+saveTasks :: [Task] -> IO ()
+saveTasks taskList = writeFile "tasks.txt" (show taskList)
+
 loop :: [Task] -> IO ()
 loop taskList = do
     line <- getLine
     case words line of
-        ["quit"] -> putStrLn "Bye!"
+        ["quit"] -> do 
+            saveTasks taskList
+            putStrLn "Bye!"
         ["list"] -> do
             putStrLn (renderAll taskList)
             loop taskList
@@ -38,6 +55,6 @@ loop taskList = do
 
 main :: IO ()
 main = do
-    let greeting = "Your TODO list. Commands: add, done, list, quit"
-    putStrLn greeting
-    loop []
+    putStrLn "Your TODO list. Commands: add, done, list, quit"
+    taskList <- loadTasks
+    loop taskList
