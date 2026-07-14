@@ -13,7 +13,9 @@ so your list survives between runs.
 |---|---|
 | `add <task>` | add a new task, e.g. `add buy milk` |
 | `done <task>` | mark a task as done, e.g. `done buy milk` |
+| `remove <task>` | delete a task from the list |
 | `list` | show all tasks (`[x]` = done, `[ ]` = not yet) |
+| `count` | show how many tasks are left to do |
 | `quit` | save and exit |
 
 ## How to run
@@ -31,7 +33,8 @@ Building this taught me the Haskell basics, hands-on:
 - **Defining my own types** — the `Task` record, and `deriving` abilities like `Show`, `Read`, `Eq`
 - **Pure functions** — `addTask`, `completeTask`, `renderAll` always give the same answer for the same input and can't touch the outside world; the type says so
 - **Pattern matching** — `case words line of` to pick apart user commands by shape
-- **Working with lists** — `map`, `:`, `words`/`unwords`, `unlines` instead of writing loops
+- **Working with lists** — `map`, `filter`, `length`, `:`, `words`/`unwords`, `unlines` instead of writing loops
+- **Lambdas** — nameless mini-functions like `\task -> not (done task)` for quick tests and transforms
 - **Recursion instead of loops** — the app "remembers" the task list by each round of `loop` passing a new list to the next round; nothing is ever modified in place
 - **IO vs pure code** — `do` blocks, `<-` vs `let`, and why `main :: IO ()`
 - **Persistence with `show` and `read`** — turning the whole task list into text and back

@@ -77,7 +77,7 @@ loop taskList = do
             putStrLn (renderAll taskList)
             loop taskList
         ["count"] -> do
-            putStrLn (show(countUndone taskList))
+            putStrLn (show (countUndone taskList))
             loop taskList
         ("add":rest) -> loop (addTask (unwords rest) taskList)
         ("remove":rest) -> loop (removeTask (unwords rest) taskList)
