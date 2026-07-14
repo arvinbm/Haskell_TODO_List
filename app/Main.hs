@@ -40,6 +40,10 @@ completeTask desc taskList = map (markTaskDone desc) taskList
 removeTask :: String -> [Task] -> [Task]
 removeTask desc taskList = filter (\task -> description task /= desc) taskList
 
+-- Counts the number of undone tasks
+countUndone :: [Task] -> Int
+countUndone taskList = length (filter (\task -> not (done task)) taskList)
+
 --------------------------------------------------------
 -- IO actions: reading/writing files, talking to user --
 --------------------------------------------------------
@@ -72,15 +76,18 @@ loop taskList = do
         ["list"] -> do
             putStrLn (renderAll taskList)
             loop taskList
+        ["count"] -> do
+            putStrLn (show(countUndone taskList))
+            loop taskList
         ("add":rest) -> loop (addTask (unwords rest) taskList)
         ("remove":rest) -> loop (removeTask (unwords rest) taskList)
         ("done":rest) -> loop (completeTask (unwords rest) taskList)
         _ -> do
-            putStrLn "Commands: add <task>, done <task>, remove <task>, list, quit"
+            putStrLn "Commands: add <task>, done <task>, remove <task>, count, list, quit"
             loop taskList
 
 main :: IO ()
 main = do
-    putStrLn "Commands: add <task>, done <task>, remove <task>, list, quit"
+    putStrLn "Commands: add <task>, done <task>, remove <task>, list, count, quit"
     taskList <- loadTasks
     loop taskList
