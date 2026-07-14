@@ -1,6 +1,6 @@
 module Main where
-
 import System.Directory (doesFileExist)
+import System.IO (readFile')
 
 -- A single to-do item: what it says, and whether it's finished.
 data Task = Task {
@@ -44,6 +44,10 @@ removeTask desc taskList = filter (\task -> description task /= desc) taskList
 countUndone :: [Task] -> Int
 countUndone taskList = length (filter (\task -> not (done task)) taskList)
 
+-- Removes the tasks marked done.
+clearTasks :: [Task] -> [Task]
+clearTasks taskList = filter (\task -> not (done task)) taskList
+
 --------------------------------------------------------
 -- IO actions: reading/writing files, talking to user --
 --------------------------------------------------------
@@ -54,7 +58,7 @@ loadTasks = do
     exists <- doesFileExist "tasks.txt"
     if exists
         then do
-            text <- readFile "tasks.txt"
+            text <- readFile' "tasks.txt"
             return (read text)
         else
             return []
@@ -79,15 +83,16 @@ loop taskList = do
         ["count"] -> do
             putStrLn (show (countUndone taskList))
             loop taskList
+        ["clear"] -> loop (clearTasks taskList)
         ("add":rest) -> loop (addTask (unwords rest) taskList)
         ("remove":rest) -> loop (removeTask (unwords rest) taskList)
         ("done":rest) -> loop (completeTask (unwords rest) taskList)
         _ -> do
-            putStrLn "Commands: add <task>, done <task>, remove <task>, count, list, quit"
+            putStrLn "Commands: add <task>, done <task>, remove <task>, clear, count, list, quit"
             loop taskList
 
 main :: IO ()
 main = do
-    putStrLn "Commands: add <task>, done <task>, remove <task>, list, count, quit"
+    putStrLn "Commands: add <task>, done <task>, remove <task>, clear, list, count, quit"
     taskList <- loadTasks
     loop taskList
