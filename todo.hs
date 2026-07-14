@@ -4,9 +4,9 @@ data Task = Task {
 } deriving(Show)
 
 render :: Task -> String
-render t = if done t
-    then "[x] " ++ description t
-    else "[ ] " ++ description t
+render task = if done task
+    then "[x] " ++ description task
+    else "[ ] " ++ description task
 
 addTask :: String -> [Task] -> [Task]
 addTask desc taskList = Task { description = desc, done = False } : taskList
@@ -14,3 +14,10 @@ addTask desc taskList = Task { description = desc, done = False } : taskList
 renderAll :: [Task] -> String
 renderAll taskList = unlines (map render taskList)
 
+markTaskDone :: String -> Task -> Task
+markTaskDone desc task = if description task == desc
+    then task {done = True}
+    else task
+
+completeTask :: String -> [Task] -> [Task]
+completeTask desc taskList = map (markTaskDone desc) taskList
