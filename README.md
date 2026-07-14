@@ -14,6 +14,7 @@ so your list survives between runs.
 | `add <task>` | add a new task, e.g. `add buy milk` |
 | `done <task>` | mark a task as done, e.g. `done buy milk` |
 | `remove <task>` | delete a task from the list |
+| `clear` | delete all completed tasks |
 | `list` | show all tasks (`[x]` = done, `[ ]` = not yet) |
 | `count` | show how many tasks are left to do |
 | `quit` | save and exit |
