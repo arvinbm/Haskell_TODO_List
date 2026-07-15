@@ -12,12 +12,16 @@ so your list survives between runs.
 | Command | What it does |
 |---|---|
 | `add <task>` | add a new task, e.g. `add buy milk` |
-| `done <task>` | mark a task as done, e.g. `done buy milk` |
-| `remove <task>` | delete a task from the list |
+| `done <number>` | mark a task as done by its number, e.g. `done 2` (`done <task>` works too) |
+| `remove <number>` | delete a task by its number (`remove <task>` works too) |
 | `clear` | delete all completed tasks |
-| `list` | show all tasks (`[x]` = done, `[ ]` = not yet) |
+| `list` | show all tasks, numbered (`[x]` = done, `[ ]` = not yet) |
 | `count` | show how many tasks are left to do |
 | `quit` | save and exit |
+
+Every command confirms what it did (`Added: buy milk`, `Cleared 2 completed task(s)`),
+and invalid input gets a helpful message instead of a crash — `done 99` tells you the
+task doesn't exist, `done banana` falls back to matching by description.
 
 ## How to run
 
@@ -39,6 +43,10 @@ Building this taught me the Haskell basics, hands-on:
 - **Recursion instead of loops** — the app "remembers" the task list by each round of `loop` passing a new list to the next round; nothing is ever modified in place
 - **IO vs pure code** — `do` blocks, `<-` vs `let`, and why `main :: IO ()`
 - **Persistence with `show` and `read`** — turning the whole task list into text and back
+- **`Maybe` for things that might not exist** — `readMaybe` returns `Just 2` or `Nothing` instead of crashing on bad input, and pattern matching forces me to handle both cases
+- **Tuples and `zip`** — numbering tasks by zipping them with the infinite list `[1..]`; laziness means only the needed numbers ever get made
+- **Validating user input** — bounds-checking task numbers and giving friendly error messages instead of silent failures
+- **Laziness has sharp edges too** — lazy `readFile` kept the file open and crashed a later write; strict `readFile'` fixed it
 - **Project structure** — GHCup for the toolchain, `cabal init`, `build-depends`, `cabal run`
 
 ## Project structure
