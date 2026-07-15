@@ -1,6 +1,7 @@
 module Main where
 import System.Directory (doesFileExist)
 import System.IO (readFile')
+import Text.Read (readMaybe)
 
 -- A single to-do item: what it says, and whether it's finished.
 data Task = Task {
@@ -12,11 +13,11 @@ data Task = Task {
 -- Pure functions: no input/output, same answer every time --
 ------------------------------------------------------------
 
--- One task as a display line, e.g. "[x] buy milk"
-render :: Task -> String
-render task = if done task
-    then "[x] " ++ description task
-    else "[ ] " ++ description task
+-- One task as a display line, e.g. "1. [x] buy milk"
+render :: Int -> Task -> String
+render n task = if done task
+    then show n ++ ". " ++ "[x] " ++ description task
+    else show n ++ ". " ++ "[ ] " ++ description task
 
 -- A new (not done) task, attached to the front of the list.
 addTask :: String -> [Task] -> [Task]
@@ -24,7 +25,7 @@ addTask desc taskList = Task { description = desc, done = False } : taskList
 
 -- The whole list as display text, one task per line.
 renderAll :: [Task] -> String
-renderAll taskList = unlines (map render taskList)
+renderAll taskList = unlines (map (\(n, task) -> render n task ) (zip [1..] taskList))
 
 -- One task: a copy marked done if the description matches, untouched otherwise.
 markTaskDone :: String -> Task -> Task
@@ -47,6 +48,10 @@ countUndone taskList = length (filter (\task -> not (done task)) taskList)
 -- Removes the tasks marked done.
 clearTasks :: [Task] -> [Task]
 clearTasks taskList = filter (\task -> not (done task)) taskList
+
+-- Marks the nth task as done.
+completeTaskAt :: Int -> [Task] -> [Task]
+completeTaskAt n taskList = map (\(i, task) -> if i == n then task {done = True} else task) (zip [1..] taskList)
 
 --------------------------------------------------------
 -- IO actions: reading/writing files, talking to user --
@@ -77,22 +82,36 @@ loop taskList = do
         ["quit"] -> do
             saveTasks taskList
             putStrLn "Bye!"
+
         ["list"] -> do
             putStrLn (renderAll taskList)
             loop taskList
+
         ["count"] -> do
             putStrLn (show (countUndone taskList))
             loop taskList
+
         ["clear"] -> loop (clearTasks taskList)
+
         ("add":rest) -> loop (addTask (unwords rest) taskList)
+
         ("remove":rest) -> loop (removeTask (unwords rest) taskList)
-        ("done":rest) -> loop (completeTask (unwords rest) taskList)
+
+        ("done":rest) ->
+            case readMaybe (unwords rest) of
+                Just n -> if n >= 1 && n <= length taskList
+                    then loop (completeTaskAt n taskList)
+                    else do 
+                        putStrLn ("Task " ++ show n ++ " does not exist")
+                        loop taskList
+                Nothing -> loop (completeTask (unwords rest) taskList)
+
         _ -> do
-            putStrLn "Commands: add <task>, done <task>, remove <task>, clear, count, list, quit"
+            putStrLn "Commands: add <task>, done <task>, done <task number>, remove <task>, clear, count, list, quit"
             loop taskList
 
 main :: IO ()
 main = do
-    putStrLn "Commands: add <task>, done <task>, remove <task>, clear, list, count, quit"
+    putStrLn "Commands: add <task>, done <task>, done <task number>, remove <task>, clear, list, count, quit"
     taskList <- loadTasks
     loop taskList
