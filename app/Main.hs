@@ -41,6 +41,10 @@ completeTask desc taskList = map (markTaskDone desc) taskList
 removeTask :: String -> [Task] -> [Task]
 removeTask desc taskList = filter (\task -> description task /= desc) taskList
 
+-- Remove a task with a given number
+removeTaskAt :: Int -> [Task] -> [Task]
+removeTaskAt n taskList = map snd (filter (\(i, _) -> i /= n) (zip [1..] taskList))
+
 -- Counts the number of undone tasks
 countUndone :: [Task] -> Int
 countUndone taskList = length (filter (\task -> not (done task)) taskList)
@@ -82,7 +86,7 @@ help = unlines
     [ "Commands:"
     , "  add <task>       add a new task"
     , "  done <number>    mark a task as done (done <task> works too)"
-    , "  remove <task>    delete a task"
+    , "  remove <number>  delete a task (remove <task> works too)"
     , "  list             show all tasks"
     , "  count            show how many tasks are left to do"
     , "  clear            delete all completed tasks"
@@ -125,15 +129,25 @@ loop taskList = do
                     putStrLn ("Added: " ++ desc)
                     loop (addTask desc taskList)
 
-        ("remove":rest) -> do
-            let desc = unwords rest
-            if taskExists desc taskList
+        ("remove":rest) ->
+            case readMaybe (unwords rest) of
+            Just n -> if n >= 1 && n <= length taskList
                 then do
-                    putStrLn ("Removed: " ++ desc)
-                    loop (removeTask desc taskList)
+                    putStrLn ("Removed task: " ++ show n)
+                    loop (removeTaskAt n taskList)
                 else do
-                    putStrLn ("No task called '" ++ desc ++ "'")
+                    putStrLn ("Task " ++ show n ++ " does not exist")
                     loop taskList
+
+            Nothing -> do
+                let desc = unwords rest
+                if taskExists desc taskList
+                    then do
+                        putStrLn ("Removed: " ++ desc)
+                        loop (removeTask desc taskList)
+                    else do
+                        putStrLn ("No task called '" ++ desc ++ "'")
+                        loop taskList
 
         ("done":rest) ->
             case readMaybe (unwords rest) of
