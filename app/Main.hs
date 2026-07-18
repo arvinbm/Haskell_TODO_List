@@ -3,10 +3,15 @@ import System.Directory (doesFileExist)
 import System.IO (readFile')
 import Text.Read (readMaybe)
 
+-- The priority data type
+data Priority = Low | Normal | High
+    deriving (Show, Read, Eq, Ord)
+
 -- A single to-do item: what it says, and whether it's finished.
 data Task = Task {
     description :: String,
-    done :: Bool
+    done :: Bool,
+    priority :: Priority
 } deriving(Show, Read)  -- Show: Task -> text, Read: text -> Task (used for saving/loading)
 
 ------------------------------------------------------------
@@ -16,12 +21,12 @@ data Task = Task {
 -- One task as a display line, e.g. "1. [x] buy milk"
 render :: Int -> Task -> String
 render n task = if done task
-    then show n ++ ". " ++ "[x] " ++ description task
-    else show n ++ ". " ++ "[ ] " ++ description task
+    then show n ++ ". " ++ "[x] " ++ description task ++ " - Priority Level: " ++ show (priority task)
+    else show n ++ ". " ++ "[ ] " ++ description task ++ " - Priority Level: " ++ show (priority task)
 
 -- A new (not done) task, attached to the front of the list.
-addTask :: String -> [Task] -> [Task]
-addTask desc taskList = Task { description = desc, done = False } : taskList
+addTask :: Priority -> String -> [Task] -> [Task]
+addTask priorityLevel desc taskList = Task { description = desc, done = False, priority = priorityLevel} : taskList
 
 -- The whole list as display text, one task per line.
 renderAll :: [Task] -> String
@@ -68,7 +73,9 @@ loadTasks = do
     if exists
         then do
             text <- readFile' "tasks.txt"
-            return (read text)
+            case readMaybe text of
+                Just tasks -> return tasks
+                Nothing -> return []
         else
             return []
 
@@ -84,7 +91,7 @@ taskExists desc taskList = any (\task -> description task == desc) taskList
 help :: String
 help = unlines
     [ "Commands:"
-    , "  add <task>       add a new task"
+    , "  add <priority> <task>       add a new task"
     , "  done <number>    mark a task as done (done <task> works too)"
     , "  remove <number>  delete a task (remove <task> works too)"
     , "  list             show all tasks"
@@ -120,14 +127,18 @@ loop taskList = do
             loop newList
 
         ("add":rest) -> do
-            let desc = unwords rest
+            let (priorityLevel, descWords) = case rest of
+                    ("high":more) -> (High, more)
+                    ("low":more) -> (Low, more)
+                    _ -> (Normal, rest)
+            let desc = unwords descWords
             if null desc
                 then do
                     putStrLn "Nothing to add. Try: add buy milk"
                     loop taskList
                 else do
-                    putStrLn ("Added: " ++ desc)
-                    loop (addTask desc taskList)
+                    putStrLn ("Added: " ++ desc ++ " with priority level: " ++ show priorityLevel)
+                    loop (addTask priorityLevel desc taskList)
 
         ("remove":rest) ->
             case readMaybe (unwords rest) of
