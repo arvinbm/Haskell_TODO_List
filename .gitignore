@@ -3,3 +3,4 @@ dist-newstyle/
 
 # personal task data, not source code
 tasks.txt
+*.bak
