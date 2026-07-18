@@ -12,10 +12,11 @@ so your list survives between runs.
 | Command | What it does |
 |---|---|
 | `add <task>` | add a new task, e.g. `add buy milk` |
+| `add high/low <task>` | add a task with a priority, e.g. `add high pay rent` (default is Normal) |
 | `done <number>` | mark a task as done by its number, e.g. `done 2` (`done <task>` works too) |
 | `remove <number>` | delete a task by its number (`remove <task>` works too) |
 | `clear` | delete all completed tasks |
-| `list` | show all tasks, numbered (`[x]` = done, `[ ]` = not yet) |
+| `list` | show all tasks, numbered, with their priority (`[x]` = done, `[ ]` = not yet) |
 | `count` | show how many tasks are left to do |
 | `quit` | save and exit |
 
@@ -36,6 +37,7 @@ cabal run
 Building this taught me the Haskell basics, hands-on:
 
 - **Defining my own types** — the `Task` record, and `deriving` abilities like `Show`, `Read`, `Eq`
+- **Sum types** — `data Priority = Low | Normal | High`, a type with a fixed set of choices; deriving `Ord` makes the declaration order the sort order
 - **Pure functions** — `addTask`, `completeTask`, `renderAll` always give the same answer for the same input and can't touch the outside world; the type says so
 - **Pattern matching** — `case words line of` to pick apart user commands by shape
 - **Working with lists** — `map`, `filter`, `length`, `:`, `words`/`unwords`, `unlines` instead of writing loops
@@ -43,7 +45,7 @@ Building this taught me the Haskell basics, hands-on:
 - **Recursion instead of loops** — the app "remembers" the task list by each round of `loop` passing a new list to the next round; nothing is ever modified in place
 - **IO vs pure code** — `do` blocks, `<-` vs `let`, and why `main :: IO ()`
 - **Persistence with `show` and `read`** — turning the whole task list into text and back
-- **`Maybe` for things that might not exist** — `readMaybe` returns `Just 2` or `Nothing` instead of crashing on bad input, and pattern matching forces me to handle both cases
+- **`Maybe` for things that might not exist** — `readMaybe` returns `Just 2` or `Nothing` instead of crashing on bad input, and pattern matching forces me to handle both cases; the same trick makes loading a corrupt or old-format save file safe
 - **Tuples and `zip`** — numbering tasks by zipping them with the infinite list `[1..]`; laziness means only the needed numbers ever get made
 - **Validating user input** — bounds-checking task numbers and giving friendly error messages instead of silent failures
 - **Laziness has sharp edges too** — lazy `readFile` kept the file open and crashed a later write; strict `readFile'` fixed it
