@@ -2,6 +2,8 @@ module Main where
 import System.Directory (doesFileExist)
 import System.IO (readFile')
 import Text.Read (readMaybe)
+import Data.List (sortOn) 
+import Data.Ord (Down(..))
 
 -- The priority data type
 data Priority = Low | Normal | High
@@ -58,6 +60,10 @@ countUndone taskList = length (filter (\task -> not (done task)) taskList)
 clearTasks :: [Task] -> [Task]
 clearTasks taskList = filter (\task -> not (done task)) taskList
 
+-- Sorts tasks based on the priority.
+sortTasks :: [Task] -> [Task]
+sortTasks taskList = sortOn (\task -> Down (priority task)) taskList
+
 -- Marks the nth task as done.
 completeTaskAt :: Int -> [Task] -> [Task]
 completeTaskAt n taskList = map (\(i, task) -> if i == n then task {done = True} else task) (zip [1..] taskList)
@@ -96,6 +102,7 @@ help = unlines
     , "  remove <number>  delete a task (remove <task> works too)"
     , "  list             show all tasks"
     , "  count            show how many tasks are left to do"
+    , "  sort             sort the list by priority"
     , "  clear            delete all completed tasks"
     , "  quit             save and exit"
     ]
@@ -125,6 +132,10 @@ loop taskList = do
             let newList = clearTasks taskList
             putStrLn ("Cleared " ++ show (length taskList - length newList) ++ " completed task(s)")
             loop newList
+        
+        ["sort"] -> do
+            putStrLn ("sorted list based on tasks' priorities")
+            loop (sortTasks taskList)
 
         ("add":rest) -> do
             let (priorityLevel, descWords) = case rest of
